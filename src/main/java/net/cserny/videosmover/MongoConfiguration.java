@@ -7,8 +7,6 @@ import io.smallrye.config.ConfigMapping;
 @ConfigMapping(prefix = "mongo")
 public interface MongoConfiguration {
 
-    String url();
-
     String db();
 
     String collection();

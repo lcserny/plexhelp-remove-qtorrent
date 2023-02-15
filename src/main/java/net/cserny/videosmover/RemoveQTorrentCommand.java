@@ -15,7 +15,7 @@ public class RemoveQTorrentCommand implements Runnable {
     QTorrentV2TorrentsClient qTorrentV2TorrentsClient;
 
     @Inject
-    MongoConfiguration mongoConfiguration;
+    MongoService mongoService;
 
     @CommandLine.Option(names = {"-h", "-hash"}, description = "QBittorrent hash of the torrent to remove")
     private String hash;
@@ -25,8 +25,8 @@ public class RemoveQTorrentCommand implements Runnable {
         // use $PWD/config/application.properties for prod overrides
 
         LOGGER.info("Hash passed: " + hash);
-        LOGGER.info("Mongo db = " + mongoConfiguration.db());
 
-        qTorrentV2TorrentsClient.delete("sdfsdfs", false);
+//        qTorrentV2TorrentsClient.delete("sdfsdfs", false);
+        mongoService.updateCache(new DownloadedTorrent());
     }
 }
