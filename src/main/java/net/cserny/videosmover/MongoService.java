@@ -36,6 +36,8 @@ public class MongoService implements CacheUpdater {
                 .collect(Collectors.toList());
 
         collection.insertMany(docs);
+
+        LOGGER.info("Cache updated for " + collection + " collection");
     }
 
     private MongoCollection<Document> getDownloadCacheCollection() {
