@@ -10,7 +10,7 @@ import java.util.List;
 
 @Path("/api/v2")
 @RegisterRestClient
-public interface QTorrentV2ApiClient {
+public interface QBitTorrentV2ApiClient {
 
     @POST
     @Path("/torrents/delete")
@@ -25,16 +25,16 @@ public interface QTorrentV2ApiClient {
     List<TorrentFile> files(@FormParam("hash") String hash);
 
     @ClientExceptionMapper
-    static QTorrentException handleException(Response response) {
+    static QBitTorrentException handleException(Response response) {
         if (response.getStatus() != 200) {
-            throw new QTorrentException("HTTP " + response.getStatus() + ": " + response.readEntity(String.class));
+            throw new QBitTorrentException("HTTP " + response.getStatus() + ": " + response.readEntity(String.class));
         }
         return null;
     }
 
-    class QTorrentException extends RuntimeException {
+    class QBitTorrentException extends RuntimeException {
 
-        public QTorrentException(String message) {
+        public QBitTorrentException(String message) {
             super(message);
         }
     }
