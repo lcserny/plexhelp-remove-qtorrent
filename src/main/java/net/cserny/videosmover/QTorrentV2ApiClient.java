@@ -6,16 +6,23 @@ import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.List;
 
-@Path("/api/v2/torrents")
+@Path("/api/v2")
 @RegisterRestClient
-public interface QTorrentV2TorrentsClient {
+public interface QTorrentV2ApiClient {
 
     @POST
-    @Path("/delete")
+    @Path("/torrents/delete")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.TEXT_PLAIN)
     String delete(@FormParam("hashes") String hash, @FormParam("deleteFiles") boolean deleteFiles);
+
+    @POST
+    @Path("/torrents/files")
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Produces(MediaType.APPLICATION_JSON)
+    List<TorrentFile> files(@FormParam("hash") String hash);
 
     @ClientExceptionMapper
     static QTorrentException handleException(Response response) {

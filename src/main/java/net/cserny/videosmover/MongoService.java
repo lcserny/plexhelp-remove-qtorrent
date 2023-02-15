@@ -16,7 +16,7 @@ public class MongoService {
     @Inject
     MongoClient client;
 
-    public void updateCache(DownloadedTorrent torrent) {
+    public void updateCache(TorrentFile torrent) {
         Document document = new Document()
                 .append("name", torrent.getName())
                 .append("dateDownloaded", torrent.getDateDownloaded());

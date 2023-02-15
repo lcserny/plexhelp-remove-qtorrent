@@ -12,12 +12,12 @@ public class RemoveQTorrentCommand implements Runnable {
     private static final Logger LOGGER = Logger.getLogger(RemoveQTorrentCommand.class);
 
     @RestClient
-    QTorrentV2TorrentsClient qTorrentV2TorrentsClient;
+    QTorrentV2ApiClient qTorrentV2TorrentsClient;
 
     @Inject
     MongoService mongoService;
 
-    @CommandLine.Option(names = {"-h", "-hash"}, description = "QBittorrent hash of the torrent to remove")
+    @CommandLine.Option(names = {"-h", "-hash"}, required = true, description = "QBittorrent hash of the torrent to remove")
     private String hash;
 
     @Override
@@ -26,7 +26,7 @@ public class RemoveQTorrentCommand implements Runnable {
 
         LOGGER.info("Hash passed: " + hash);
 
+        mongoService.updateCache(new TorrentFile());
 //        qTorrentV2TorrentsClient.delete("sdfsdfs", false);
-        mongoService.updateCache(new DownloadedTorrent());
     }
 }
