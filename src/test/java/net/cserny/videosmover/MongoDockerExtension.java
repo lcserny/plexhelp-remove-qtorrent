@@ -10,6 +10,7 @@ import java.util.List;
 
 public class MongoDockerExtension implements BeforeAllCallback, AfterAllCallback {
 
+    // port used in test properties file also
     static int MONGO_PORT = 37017;
 
     private GenericContainer<?> mongoDbContainer;

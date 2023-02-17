@@ -10,6 +10,7 @@ import java.util.List;
 
 public class QTorrentDockerExtension implements BeforeAllCallback, AfterAllCallback {
 
+    // port used in test properties file also
     static int QTORRENT_PORT = 7099;
 
     private GenericContainer<?> qbittorrentContainer;
