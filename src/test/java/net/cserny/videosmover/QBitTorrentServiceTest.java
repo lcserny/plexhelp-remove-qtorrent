@@ -52,6 +52,8 @@ public class QBitTorrentServiceTest {
         URL torrentFileUrl = Thread.currentThread().getContextClassLoader().getResource(TORRENT_FILENAME);
         File torrentFile = new File(torrentFileUrl.getPath());
 
+        // TODO: use torrent url instead of file in test resources
+
 //        MultipartTorrent torrent = new MultipartTorrent();
         // FIXME: error stream reset, broken pipe
 //        torrent.file = new FileInputStream(torrentFile);
