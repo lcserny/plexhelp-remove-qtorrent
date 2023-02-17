@@ -30,11 +30,10 @@ public class FullDeploymentExtension implements BeforeAllCallback, AfterAllCallb
         qbittorrentContainer.setPortBindings(List.of(QTORRENT_PORT + ":" + QTORRENT_PORT));
         qbittorrentContainer.start();
 
-        // TODO: mongo healthcheck doesnt work
         mongoDbContainer = new GenericContainer<>("mongo:5.0")
                 .withExposedPorts(MONGO_PORT)
                 .withNetwork(network)
-                .waitingFor(Wait.forHttp("/test").forPort(MONGO_PORT));
+                .waitingFor(Wait.forLogMessage(".*MongoDB starting.*", 1));
         mongoDbContainer.setPortBindings(List.of(MONGO_PORT + ":27017"));
         mongoDbContainer.start();
     }

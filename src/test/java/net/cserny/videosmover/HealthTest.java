@@ -1,6 +1,8 @@
 package net.cserny.videosmover;
 
+import io.restassured.response.Response;
 import org.apache.http.HttpStatus;
+import org.jboss.logging.Logger;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -15,15 +17,25 @@ import static io.restassured.RestAssured.given;
 @Testcontainers
 public class HealthTest {
 
+    private static final Logger LOGGER = Logger.getLogger(HealthTest.class);
+
     @RegisterExtension
     static final FullDeploymentExtension deploy = new FullDeploymentExtension();
 
+    // FIXME: gives 400 not 200...
     @Test
     public void containersStarting() {
-        given().port(deploy.QTORRENT_PORT)
+        Response response = given()
+                .port(deploy.QTORRENT_PORT)
+                .header("Referer", "http://localhost:" + deploy.QTORRENT_PORT)
+                .body(Map.of("username", "admin", "password", "adminadmin"))
                 .when()
-                    .post("/api/v2/auth/login", Map.of("username", "admin", "password", "adminadmin"))
+                .post("/api/v2/auth/login")
                 .then()
-                    .statusCode(HttpStatus.SC_OK);
+                .statusCode(HttpStatus.SC_OK)
+                .extract()
+                .response();
+
+        LOGGER.info("LEO: " + response.prettyPrint());
     }
 }
