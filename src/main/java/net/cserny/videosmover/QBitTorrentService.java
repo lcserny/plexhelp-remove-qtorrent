@@ -2,6 +2,7 @@ package net.cserny.videosmover;
 
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.logging.Logger;
+import org.jboss.resteasy.reactive.RestResponse;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
@@ -23,7 +24,7 @@ public class QBitTorrentService implements TorrentService {
 
     @Override
     public String generateSid() {
-        Response resp = client.login(configuration.username(), configuration.password());
+        RestResponse<String> resp = client.login(configuration.username(), configuration.password());
         return resp.getCookies().get(SID_KEY).getValue();
     }
 

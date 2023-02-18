@@ -110,17 +110,6 @@ public class QBitTorrentServiceTest {
     }
 
     private String generateOperationsCookie() {
-        Response response = given()
-                .port(deploy.QTORRENT_PORT)
-                .formParam("username", "admin")
-                .formParam("password", "adminadmin")
-                .when()
-                .post("/api/v2/auth/login")
-                .then()
-                .log().ifValidationFails()
-                .statusCode(HttpStatus.SC_OK)
-                .extract()
-                .response();
-        return response.cookie(SID_KEY);
+        return qBitTorrentService.generateSid();
     }
 }

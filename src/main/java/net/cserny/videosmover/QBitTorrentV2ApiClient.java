@@ -2,6 +2,7 @@ package net.cserny.videosmover;
 
 import io.quarkus.rest.client.reactive.ClientExceptionMapper;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
+import org.jboss.resteasy.reactive.RestResponse;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -16,9 +17,9 @@ public interface QBitTorrentV2ApiClient {
 
     @POST
     @Path("/auth/login")
-    @Consumes(MediaType.TEXT_PLAIN)
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.TEXT_PLAIN)
-    Response login(@FormParam("username") String username, @FormParam("password") String password);
+    RestResponse<String> login(@FormParam("username") String username, @FormParam("password") String password);
 
     @POST
     @Path("/torrents/delete")
