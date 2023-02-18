@@ -4,8 +4,11 @@ import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.logging.Logger;
 
 import javax.enterprise.context.Dependent;
-import java.io.File;
+import javax.inject.Inject;
+import javax.ws.rs.core.Response;
 import java.util.List;
+
+import static net.cserny.videosmover.QBitTorrentV2ApiClient.SID_KEY;
 
 @Dependent
 public class QBitTorrentService implements TorrentService {
@@ -14,6 +17,15 @@ public class QBitTorrentService implements TorrentService {
 
     @RestClient
     QBitTorrentV2ApiClient client;
+
+    @Inject
+    TorrentWebUIConfiguration configuration;
+
+    @Override
+    public String generateSid() {
+        Response resp = client.login(configuration.username(), configuration.password());
+        return resp.getCookies().get(SID_KEY).getValue();
+    }
 
     @Override
     public void delete(String sid, String hash, boolean deleteFiles) {
@@ -24,11 +36,5 @@ public class QBitTorrentService implements TorrentService {
     @Override
     public List<TorrentFile> listFiles(String sid, String hash) {
         return client.files(sid, hash);
-    }
-
-    @Override
-//    public void add(String sid, MultipartTorrent torrent) {
-    public void add(String sid, File torrent) {
-        client.add(sid, torrent);
     }
 }

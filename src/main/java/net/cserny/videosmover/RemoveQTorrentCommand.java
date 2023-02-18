@@ -19,9 +19,9 @@ public class RemoveQTorrentCommand implements Runnable {
 
     @Override
     public void run() {
-        // relies on unauthenticated operations in QTorrent WebUI, no SID passed
-        List<TorrentFile> files = torrentService.listFiles(null, hash);
+        String sid = torrentService.generateSid();
+        List<TorrentFile> files = torrentService.listFiles(sid, hash);
         cacheUpdater.updateCache(files);
-        torrentService.delete(null, hash, false);
+        torrentService.delete(sid, hash, false);
     }
 }
