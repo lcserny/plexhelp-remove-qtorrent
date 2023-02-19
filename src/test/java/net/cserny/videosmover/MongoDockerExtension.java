@@ -19,7 +19,10 @@ public class MongoDockerExtension implements BeforeAllCallback, AfterAllCallback
     public void beforeAll(ExtensionContext extensionContext) throws Exception {
         mongoDbContainer = new GenericContainer<>("mongo:5.0")
                 .withExposedPorts(MONGO_PORT)
-                .waitingFor(Wait.forLogMessage(".*MongoDB starting.*", 1));
+                // credentails used in test properties file also
+                .withEnv("MONGO_INITDB_ROOT_USERNAME", "root")
+                .withEnv("MONGO_INITDB_ROOT_PASSWORD", "example")
+                .waitingFor(Wait.forLogMessage(".*Waiting for connections.*", 1));
         mongoDbContainer.setPortBindings(List.of(MONGO_PORT + ":27017"));
         mongoDbContainer.start();
     }
