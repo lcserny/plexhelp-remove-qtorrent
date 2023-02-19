@@ -40,10 +40,6 @@ public class VideosMoverMongoDatabaseService implements VideosMoverDatabaseServi
         LOGGER.info("Cache updated for " + collection + " collection");
     }
 
-    public void close() {
-        client.close();
-    }
-
     public MongoCollection<Document> getDownloadCache() {
         MongoDatabase database = client.getDatabase(configuration.db());
         createCollection(database, configuration.collection());

@@ -10,6 +10,4 @@ public interface VideosMoverDatabaseService {
     MongoCollection<Document> getDownloadCache();
 
     void updateDownloadsCache(List<TorrentFile> torrentFiles);
-
-    void close();
 }
