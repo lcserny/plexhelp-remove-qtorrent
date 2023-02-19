@@ -1,7 +1,7 @@
 package net.cserny.videosmover;
 
-import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
 import io.quarkus.test.junit.QuarkusTest;
 import org.bson.Document;
 import org.junit.jupiter.api.DisplayName;
@@ -40,19 +40,17 @@ public class VideosMoverMongoDatabaseServiceTest {
 
         Document docToFind = new Document(Map.of("file_name", name, "file_size", size));
 
-        int expectedResultsCount = 1;
-        int resultsCount = 0;
-        FindIterable<Document> documents = collection.find(docToFind);
-        for (Document document : documents) {
-            assertThat("document has wrong name", document.get("file_name").equals(name));
-            assertThat("document has wrong size", document.get("file_size").equals(size));
-            assertThat("document has no date", document.get("date_downloaded") != null);
-            resultsCount++;
+        MongoCursor<Document> documentsCursor = collection.find(docToFind).iterator();
+
+        try (documentsCursor) {
+            assertThat("found documents count doesn't match", documentsCursor.available() == 1);
+
+            while (documentsCursor.hasNext()) {
+                Document document = documentsCursor.next();
+                assertThat("document has wrong name", document.get("file_name").equals(name));
+                assertThat("document has wrong size", document.get("file_size").equals(size));
+                assertThat("document has no date", document.get("date_downloaded") != null);
+            }
         }
-
-        assertThat("found documents count doesn't match", expectedResultsCount == resultsCount);
-
-        // TODO: some exception returned
-//        videosMoverMongoDatabaseService.close();
     }
 }
