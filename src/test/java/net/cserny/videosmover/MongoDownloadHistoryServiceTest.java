@@ -2,11 +2,11 @@ package net.cserny.videosmover;
 
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
+import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 import org.bson.Document;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.RegisterExtension;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import javax.inject.Inject;
@@ -17,13 +17,11 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 @QuarkusTest
 @Testcontainers
-public class VideosMoverMongoDatabaseServiceTest {
-
-    @RegisterExtension
-    static final MongoDockerExtension deploy = new MongoDockerExtension();
+@QuarkusTestResource(MongoTestSetup.class)
+public class MongoDownloadHistoryServiceTest {
 
     @Inject
-    VideosMoverMongoDatabaseService videosMoverMongoDatabaseService;
+    MongoDownloadHistoryService service;
 
     @Test
     @DisplayName("Check that service can add to download cache")
@@ -32,9 +30,9 @@ public class VideosMoverMongoDatabaseServiceTest {
         long size = 1L;
         List<TorrentFile> torrentFiles = List.of(new TorrentFile(name, size));
 
-        videosMoverMongoDatabaseService.updateDownloadsCache(torrentFiles);
+        service.updateDownloadsHistory(torrentFiles);
 
-        MongoCollection<Document> collection = videosMoverMongoDatabaseService.getDownloadCache();
+        MongoCollection<Document> collection = service.getDownloadHistory();
 
         assertThat("collection is empty", collection.countDocuments() == 1L);
 

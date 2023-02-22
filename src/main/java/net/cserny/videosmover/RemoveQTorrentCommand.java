@@ -12,7 +12,7 @@ public class RemoveQTorrentCommand implements Runnable {
     TorrentService torrentService;
 
     @Inject
-    VideosMoverDatabaseService videosMoverDatabaseService;
+    MongoDownloadHistoryService videosMoverDatabaseService;
 
     @CommandLine.Option(names = {"-h", "-hash"}, required = true, description = "QBittorrent hash of the torrent to remove")
     private String hash;
@@ -21,7 +21,7 @@ public class RemoveQTorrentCommand implements Runnable {
     public void run() {
         String sid = torrentService.generateSid();
         List<TorrentFile> files = torrentService.listFiles(sid, hash);
-        videosMoverDatabaseService.updateDownloadsCache(files);
+        videosMoverDatabaseService.updateDownloadsHistory(files);
         torrentService.delete(sid, hash, false);
     }
 }

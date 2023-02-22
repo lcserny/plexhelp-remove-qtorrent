@@ -13,9 +13,9 @@ import java.util.stream.Collectors;
 import static java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME;
 
 @Dependent
-public class VideosMoverMongoDatabaseService implements VideosMoverDatabaseService {
+public class MongoDownloadHistoryService implements DownloadHistoryService {
 
-    private static final Logger LOGGER = Logger.getLogger(VideosMoverMongoDatabaseService.class);
+    private static final Logger LOGGER = Logger.getLogger(MongoDownloadHistoryService.class);
 
     @Inject
     MongoConfiguration configuration;
@@ -23,8 +23,8 @@ public class VideosMoverMongoDatabaseService implements VideosMoverDatabaseServi
     @Inject
     MongoClient client;
 
-    public void updateDownloadsCache(List<TorrentFile> torrentFiles) {
-        MongoCollection<Document> collection = getDownloadCache();
+    public void updateDownloadsHistory(List<TorrentFile> torrentFiles) {
+        MongoCollection<Document> collection = getDownloadHistory();
 
         String dateDownloaded = ZonedDateTime.now().format(RFC_1123_DATE_TIME);
 
@@ -40,7 +40,7 @@ public class VideosMoverMongoDatabaseService implements VideosMoverDatabaseServi
         LOGGER.info("Cache updated for " + collection + " collection");
     }
 
-    public MongoCollection<Document> getDownloadCache() {
+    public MongoCollection<Document> getDownloadHistory() {
         MongoDatabase database = client.getDatabase(configuration.db());
         createCollection(database, configuration.collection());
         return database.getCollection(configuration.collection());

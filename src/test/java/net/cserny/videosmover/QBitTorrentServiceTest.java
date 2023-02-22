@@ -1,5 +1,6 @@
 package net.cserny.videosmover;
 
+import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.builder.MultiPartSpecBuilder;
 import io.restassured.http.ContentType;
@@ -7,7 +8,6 @@ import io.restassured.response.Response;
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.platform.commons.util.StringUtils;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -25,6 +25,7 @@ import static org.hamcrest.Matchers.equalTo;
 
 @QuarkusTest
 @Testcontainers
+@QuarkusTestResource(QTorrentTestSetup.class)
 public class QBitTorrentServiceTest {
 
     private static final String TORRENT_FILENAME = "ubuntu-server.iso.torrent";
@@ -32,16 +33,13 @@ public class QBitTorrentServiceTest {
     @Inject
     QBitTorrentService qBitTorrentService;
 
-    @RegisterExtension
-    static final QTorrentDockerExtension deploy = new QTorrentDockerExtension();
-
     @Test
     @DisplayName("Check that we can communicate with QBittorrent Docker Container")
     public void qtorrentWorks() {
         String cookie = generateOperationsCookie();
 
         given()
-                .port(deploy.QTORRENT_PORT)
+                .port(QTorrentTestSetup.QTORRENT_PORT)
                 .cookie(SID_KEY, cookie)
                 .when()
                 .post("/api/v2/torrents/info")
@@ -59,7 +57,7 @@ public class QBitTorrentServiceTest {
         File torrentFile = new File(torrentFileUrl.getPath());
 
         given()
-                .port(deploy.QTORRENT_PORT)
+                .port(QTorrentTestSetup.QTORRENT_PORT)
                 .cookie(SID_KEY, sid)
                 .contentType(ContentType.MULTIPART)
                 .multiPart(new MultiPartSpecBuilder(torrentFile)
@@ -74,7 +72,7 @@ public class QBitTorrentServiceTest {
                 .statusCode(HttpStatus.SC_OK);
 
         Response response = given()
-                .port(deploy.QTORRENT_PORT)
+                .port(QTorrentTestSetup.QTORRENT_PORT)
                 .cookie(SID_KEY, sid)
                 .when()
                 .post("/api/v2/torrents/info")
@@ -95,7 +93,7 @@ public class QBitTorrentServiceTest {
         qBitTorrentService.delete(sid, hash, true);
 
         Response afterDeleteResponse = given()
-                .port(deploy.QTORRENT_PORT)
+                .port(QTorrentTestSetup.QTORRENT_PORT)
                 .cookie(SID_KEY, sid)
                 .when()
                 .post("/api/v2/torrents/info")
