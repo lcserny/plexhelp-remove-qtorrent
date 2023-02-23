@@ -28,7 +28,7 @@ public class MongoDownloadHistoryServiceTest {
     public void serviceCanUpdateCache() {
         String name = "name1";
         long size = 1L;
-        List<TorrentFile> torrentFiles = List.of(new TorrentFile(name, size));
+        List<TorrentFile> torrentFiles = List.of(new TorrentFile(name, size, true));
 
         service.updateDownloadsHistory(torrentFiles);
 

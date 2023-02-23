@@ -6,13 +6,15 @@ public class TorrentFile {
 
     private String name;
     private long size;
+    private boolean isMedia;
 
     public TorrentFile() {
     }
 
-    public TorrentFile(String name, long size) {
+    public TorrentFile(String name, long size, boolean isMedia) {
         this.name = name;
         this.size = size;
+        this.isMedia = isMedia;
     }
 
     public String getName() {
@@ -31,17 +33,25 @@ public class TorrentFile {
         this.size = size;
     }
 
+    public boolean isMedia() {
+        return isMedia;
+    }
+
+    public void setMedia(boolean media) {
+        isMedia = media;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         TorrentFile that = (TorrentFile) o;
-        return size == that.size && Objects.equals(name, that.name);
+        return size == that.size && isMedia == that.isMedia && Objects.equals(name, that.name);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, size);
+        return Objects.hash(name, size, isMedia);
     }
 
     @Override
@@ -49,6 +59,7 @@ public class TorrentFile {
         return "TorrentFile{" +
                 "name='" + name + '\'' +
                 ", size=" + size +
+                ", isMedia=" + isMedia +
                 '}';
     }
 }

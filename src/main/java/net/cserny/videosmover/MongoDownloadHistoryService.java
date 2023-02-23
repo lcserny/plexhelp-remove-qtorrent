@@ -29,6 +29,7 @@ public class MongoDownloadHistoryService implements DownloadHistoryService {
         String dateDownloaded = ZonedDateTime.now().format(RFC_1123_DATE_TIME);
 
         List<Document> docs = torrentFiles.stream()
+                .filter(TorrentFile::isMedia)
                 .map(torrentFile -> new Document()
                     .append("file_name", torrentFile.getName())
                     .append("file_size", torrentFile.getSize())
