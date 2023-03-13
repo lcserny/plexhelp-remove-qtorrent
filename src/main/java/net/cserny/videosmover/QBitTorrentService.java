@@ -31,7 +31,9 @@ public class QBitTorrentService implements TorrentService {
     @Override
     public String generateSid() {
         RestResponse<String> resp = client.login(configuration.username(), configuration.password());
-        return resp.getCookies().get(SID_KEY).getValue();
+        String sid = resp.getCookies().get(SID_KEY).getValue();
+        LOGGER.info("SID generated: " + sid);
+        return sid;
     }
 
     @Override
@@ -47,6 +49,7 @@ public class QBitTorrentService implements TorrentService {
             Path torrentPath = Path.of(configuration.downloadRootPath(), torrentFile.getName());
             torrentFile.setMedia(isVideo(torrentPath));
         }
+        LOGGER.info("Files found: " + files);
         return files;
     }
 
