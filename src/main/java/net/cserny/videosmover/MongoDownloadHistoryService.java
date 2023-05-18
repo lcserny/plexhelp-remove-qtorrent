@@ -36,9 +36,12 @@ public class MongoDownloadHistoryService implements DownloadHistoryService {
                     .append("date_downloaded", dateDownloaded))
                 .collect(Collectors.toList());
 
-        collection.insertMany(docs);
-
-        LOGGER.info("Cache updated for " + collection + " collection");
+        if (!docs.isEmpty()) {
+            collection.insertMany(docs);
+            LOGGER.info("Cache updated for " + collection + " collection");
+        } else {
+            LOGGER.info("No media files found to insert in cache");
+        }
     }
 
     public MongoCollection<Document> getDownloadHistory() {
