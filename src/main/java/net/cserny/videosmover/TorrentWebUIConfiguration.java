@@ -1,17 +1,46 @@
 package net.cserny.videosmover;
 
-import io.quarkus.runtime.annotations.StaticInitSafe;
-import io.smallrye.config.ConfigMapping;
-import io.smallrye.config.WithName;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
 
-@StaticInitSafe
-@ConfigMapping(prefix = "torrent.webui")
-public interface TorrentWebUIConfiguration {
+@Configuration
+@ConfigurationProperties(prefix = "torrent.webui")
+public class TorrentWebUIConfiguration {
 
-    String username();
+    private String baseUrl;
+    private String username;
+    private String password;
+    private String downloadRootPath;
 
-    String password();
+    public String getBaseUrl() {
+        return baseUrl;
+    }
 
-    @WithName("download.root.path")
-    String downloadRootPath();
+    public void setBaseUrl(String baseUrl) {
+        this.baseUrl = baseUrl;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getDownloadRootPath() {
+        return downloadRootPath;
+    }
+
+    public void setDownloadRootPath(String downloadRootPath) {
+        this.downloadRootPath = downloadRootPath;
+    }
 }

@@ -1,55 +1,56 @@
 package net.cserny.videosmover;
 
-import org.eclipse.microprofile.config.inject.ConfigProperty;
-import org.eclipse.microprofile.rest.client.inject.RestClient;
-import org.jboss.logging.Logger;
-import org.jboss.resteasy.reactive.RestResponse;
+import lombok.extern.slf4j.Slf4j;
+import net.cserny.videosmover.TorrentFile.TorrentFiles;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
 
-import javax.enterprise.context.Dependent;
-import javax.inject.Inject;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
-import static net.cserny.videosmover.QBitTorrentV2ApiClient.SID_KEY;
-
-@Dependent
+@Service
+@Slf4j
 public class QBitTorrentService implements TorrentService {
 
-    private static final Logger LOGGER = Logger.getLogger(QBitTorrentService.class);
-
-    @RestClient
+    @Autowired
     QBitTorrentV2ApiClient client;
 
-    @Inject
+    @Autowired
     TorrentWebUIConfiguration configuration;
 
-    @ConfigProperty(name = "video.mime.types")
-    List<String> videoMimeTypes;
+    @Autowired
+    VideoConfiguration videoConfiguration;
 
     @Override
     public String generateSid() {
-        RestResponse<String> resp = client.login(configuration.username(), configuration.password());
-        String sid = resp.getCookies().get(SID_KEY).getValue();
-        LOGGER.info("SID generated: " + sid);
+        ResponseEntity<String> response = client.login(configuration.getUsername(), configuration.getPassword());
+
+        String cookies = response.getHeaders().getFirst(HttpHeaders.SET_COOKIE);
+        String sid = cookies.substring(4, cookies.indexOf(";"));
+        log.info("SID generated: " + sid);
+
         return sid;
     }
 
     @Override
     public void delete(String sid, String hash, boolean deleteFiles) {
         client.delete(sid, hash, deleteFiles);
-        LOGGER.info("Torrent deleted with hash " + hash);
+        log.info("Torrent deleted with hash " + hash);
     }
 
     @Override
     public List<TorrentFile> listFiles(String sid, String hash) {
-        List<TorrentFile> files = client.files(sid, hash);
+        ResponseEntity<TorrentFiles> response = client.files(sid, hash);
+        TorrentFiles files = response.getBody();
         for (TorrentFile torrentFile : files) {
-            Path torrentPath = Path.of(configuration.downloadRootPath(), torrentFile.getName());
+            Path torrentPath = Path.of(configuration.getDownloadRootPath(), torrentFile.getName());
             torrentFile.setMedia(isVideo(torrentPath));
         }
-        LOGGER.info("Files found: " + files);
+        log.info("Files found: " + files);
         return files;
     }
 
@@ -61,7 +62,7 @@ public class QBitTorrentService implements TorrentService {
             return false;
         }
 
-        for (String allowedType : videoMimeTypes) {
+        for (String allowedType : videoConfiguration.getMimeTypes()) {
             if (allowedType.equals(mimeType)) {
                 return true;
             }

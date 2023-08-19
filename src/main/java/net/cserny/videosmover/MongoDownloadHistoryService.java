@@ -1,53 +1,51 @@
 package net.cserny.videosmover;
 
 import com.mongodb.client.*;
+import lombok.extern.slf4j.Slf4j;
 import org.bson.Document;
-import org.jboss.logging.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.stereotype.Service;
 
-import javax.enterprise.context.Dependent;
-import javax.inject.Inject;
-import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME;
+import java.time.Instant;
 
-@Dependent
+@Service
+@Slf4j
 public class MongoDownloadHistoryService implements DownloadHistoryService {
 
-    private static final Logger LOGGER = Logger.getLogger(MongoDownloadHistoryService.class);
+    @Value("${mongo.collection}")
+    String mongoCollection;
 
-    @Inject
-    MongoConfiguration configuration;
-
-    @Inject
-    MongoClient client;
+    @Autowired
+    MongoTemplate mongoTemplate;
 
     public void updateDownloadsHistory(List<TorrentFile> torrentFiles) {
         MongoCollection<Document> collection = getDownloadHistory();
-
-        String dateDownloaded = ZonedDateTime.now().format(RFC_1123_DATE_TIME);
 
         List<Document> docs = torrentFiles.stream()
                 .filter(TorrentFile::isMedia)
                 .map(torrentFile -> new Document()
                     .append("file_name", torrentFile.getName())
                     .append("file_size", torrentFile.getSize())
-                    .append("date_downloaded", dateDownloaded))
+                    .append("date_downloaded", Instant.now()))
                 .collect(Collectors.toList());
 
         if (!docs.isEmpty()) {
             collection.insertMany(docs);
-            LOGGER.info("Cache updated for " + collection + " collection");
+            log.info("Cache updated for " + collection + " collection");
         } else {
-            LOGGER.info("No media files found to insert in cache");
+            log.info("No media files found to insert in cache");
         }
     }
 
     public MongoCollection<Document> getDownloadHistory() {
-        MongoDatabase database = client.getDatabase(configuration.db());
-        createCollection(database, configuration.collection());
-        return database.getCollection(configuration.collection());
+        MongoDatabase database = mongoTemplate.getMongoDatabaseFactory().getMongoDatabase();
+        createCollection(database, mongoCollection);
+        return database.getCollection(mongoCollection);
     }
 
     private void createCollection(MongoDatabase database, String collection) {
@@ -63,7 +61,7 @@ public class MongoDownloadHistoryService implements DownloadHistoryService {
         }
 
         if (!collectionExists) {
-            LOGGER.info("Mongo collection " + collection + " doesn't exist, creating...");
+            log.info("Mongo collection " + collection + " doesn't exist, creating...");
             database.createCollection(collection);
         }
     }

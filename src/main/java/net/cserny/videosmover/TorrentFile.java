@@ -1,5 +1,6 @@
 package net.cserny.videosmover;
 
+import java.util.ArrayList;
 import java.util.Objects;
 
 public class TorrentFile {
@@ -61,5 +62,8 @@ public class TorrentFile {
                 ", size=" + size +
                 ", isMedia=" + isMedia +
                 '}';
+    }
+
+    public static class TorrentFiles extends ArrayList<TorrentFile> {
     }
 }

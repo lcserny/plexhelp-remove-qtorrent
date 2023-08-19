@@ -1,7 +1,5 @@
 package net.cserny.videosmover;
 
-import io.quarkus.test.common.QuarkusTestResource;
-import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.builder.MultiPartSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
@@ -9,9 +7,13 @@ import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.platform.commons.util.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import javax.inject.Inject;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.net.URL;
@@ -20,17 +22,25 @@ import java.util.Map;
 
 import static io.restassured.RestAssured.given;
 import static net.cserny.videosmover.QBitTorrentV2ApiClient.SID_KEY;
+import static net.cserny.videosmover.QTorrentTestContainer.QTORRENT_PORT;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 
-@QuarkusTest
+@SpringBootTest
 @Testcontainers
-@QuarkusTestResource(QTorrentTestSetup.class)
 public class QBitTorrentServiceTest {
 
     private static final String TORRENT_FILENAME = "ubuntu-server.iso.torrent";
 
-    @Inject
+    @Container
+    public static QTorrentTestContainer torrentContainer = QTorrentTestContainer.getInstance();
+
+    @DynamicPropertySource
+    public static void qTorrentProperties(DynamicPropertyRegistry registry) {
+        registry.add("torrent.webui.baseUrl", () -> "http://localhost:" + QTORRENT_PORT);
+    }
+
+    @Autowired
     QBitTorrentService qBitTorrentService;
 
     @Test
@@ -39,7 +49,7 @@ public class QBitTorrentServiceTest {
         String cookie = generateOperationsCookie();
 
         given()
-                .port(QTorrentTestSetup.QTORRENT_PORT)
+                .port(QTorrentTestContainer.QTORRENT_PORT)
                 .cookie(SID_KEY, cookie)
                 .when()
                 .post("/api/v2/torrents/info")
@@ -57,7 +67,7 @@ public class QBitTorrentServiceTest {
         File torrentFile = new File(torrentFileUrl.getPath());
 
         given()
-                .port(QTorrentTestSetup.QTORRENT_PORT)
+                .port(QTorrentTestContainer.QTORRENT_PORT)
                 .cookie(SID_KEY, sid)
                 .contentType(ContentType.MULTIPART)
                 .multiPart(new MultiPartSpecBuilder(torrentFile)
@@ -72,7 +82,7 @@ public class QBitTorrentServiceTest {
                 .statusCode(HttpStatus.SC_OK);
 
         Response response = given()
-                .port(QTorrentTestSetup.QTORRENT_PORT)
+                .port(QTorrentTestContainer.QTORRENT_PORT)
                 .cookie(SID_KEY, sid)
                 .when()
                 .post("/api/v2/torrents/info")
@@ -93,7 +103,7 @@ public class QBitTorrentServiceTest {
         qBitTorrentService.delete(sid, hash, true);
 
         Response afterDeleteResponse = given()
-                .port(QTorrentTestSetup.QTORRENT_PORT)
+                .port(QTorrentTestContainer.QTORRENT_PORT)
                 .cookie(SID_KEY, sid)
                 .when()
                 .post("/api/v2/torrents/info")

@@ -1,50 +1,63 @@
 package net.cserny.videosmover;
 
-import io.quarkus.rest.client.reactive.ClientExceptionMapper;
-import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
-import org.jboss.resteasy.reactive.RestResponse;
+import lombok.AllArgsConstructor;
+import net.cserny.videosmover.TorrentFile.TorrentFiles;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.*;
+import org.springframework.stereotype.Component;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
 
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import java.util.List;
+@AllArgsConstructor
+@Component
+public class QBitTorrentV2ApiClient {
 
-@Path("/api/v2")
-@RegisterRestClient
-public interface QBitTorrentV2ApiClient {
+    public static final String SID_KEY = "SID";
 
-    String SID_KEY = "SID";
+    @Autowired
+    RestTemplate restTemplate;
 
-    @POST
-    @Path("/auth/login")
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    @Produces(MediaType.TEXT_PLAIN)
-    RestResponse<String> login(@FormParam("username") String username, @FormParam("password") String password);
+    @Autowired
+    TorrentWebUIConfiguration configuration;
 
-    @POST
-    @Path("/torrents/delete")
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    @Produces(MediaType.TEXT_PLAIN)
-    String delete(@CookieParam(SID_KEY) String sid, @FormParam("hashes") String hash, @FormParam("deleteFiles") boolean deleteFiles);
+    public ResponseEntity<String> login(String username, String password) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
-    @POST
-    @Path("/torrents/files")
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    @Produces(MediaType.APPLICATION_JSON)
-    List<TorrentFile> files(@CookieParam(SID_KEY) String sid, @FormParam("hash") String hash);
+        MultiValueMap<String, String> map= new LinkedMultiValueMap<>();
+        map.add("username", username);
+        map.add("password", password);
 
-    @ClientExceptionMapper
-    static QBitTorrentException handleException(Response response) {
-        if (response.getStatus() != 200) {
-            throw new QBitTorrentException("HTTP " + response.getStatus() + ": " + response.readEntity(String.class));
-        }
-        return null;
+        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(map, headers);
+
+        return restTemplate.exchange(configuration.getBaseUrl() + "/api/v2/auth/login", HttpMethod.POST, request, String.class);
     }
 
-    class QBitTorrentException extends RuntimeException {
+    public ResponseEntity<String> delete(String sid, String hash, boolean deleteFiles) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+        headers.set(HttpHeaders.COOKIE, String.format("%s=%s", SID_KEY, sid));
 
-        public QBitTorrentException(String message) {
-            super(message);
-        }
+        MultiValueMap<String, String> map= new LinkedMultiValueMap<>();
+        map.add("hashes", hash);
+        map.add("deleteFiles", String.valueOf(deleteFiles));
+
+        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(map, headers);
+
+        return restTemplate.exchange(configuration.getBaseUrl() + "/api/v2/torrents/delete", HttpMethod.POST, request, String.class);
+    }
+
+    ResponseEntity<TorrentFiles> files(String sid, String hash) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+        headers.set(HttpHeaders.COOKIE, String.format("%s=%s", SID_KEY, sid));
+
+        MultiValueMap<String, String> map= new LinkedMultiValueMap<>();
+        map.add("hash", hash);
+
+        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(map, headers);
+
+        return restTemplate.exchange(configuration.getBaseUrl() + "/api/v2/torrents/files", HttpMethod.POST, request, TorrentFiles.class);
     }
 }

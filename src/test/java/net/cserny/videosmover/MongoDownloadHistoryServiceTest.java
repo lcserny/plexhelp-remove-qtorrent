@@ -2,25 +2,35 @@ package net.cserny.videosmover;
 
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
-import io.quarkus.test.common.QuarkusTestResource;
-import io.quarkus.test.junit.QuarkusTest;
 import org.bson.Document;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+import org.testcontainers.containers.MongoDBContainer;
+import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import javax.inject.Inject;
 import java.util.List;
 import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 
-@QuarkusTest
+@SpringBootTest
 @Testcontainers
-@QuarkusTestResource(MongoTestSetup.class)
 public class MongoDownloadHistoryServiceTest {
 
-    @Inject
+    @Container
+    public static MongoDBContainer mongoContainer = new MongoDBContainer("mongo:5.0");
+
+    @DynamicPropertySource
+    public static void qTorrentProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.data.mongodb.uri", () -> mongoContainer.getConnectionString());
+    }
+
+    @Autowired
     MongoDownloadHistoryService service;
 
     @Test
