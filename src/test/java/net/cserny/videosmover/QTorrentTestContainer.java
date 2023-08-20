@@ -11,7 +11,7 @@ public class QTorrentTestContainer extends GenericContainer {
     private static QTorrentTestContainer container;
 
     public QTorrentTestContainer() {
-        super("linuxserver/qbittorrent:4.5.0");
+        super("linuxserver/qbittorrent:4.5.2");
         setExposedPorts(List.of(QTORRENT_PORT));
         setEnv(List.of("WEBUI_PORT=" + QTORRENT_PORT));
         setPortBindings(List.of(QTORRENT_PORT + ":" + QTORRENT_PORT));
